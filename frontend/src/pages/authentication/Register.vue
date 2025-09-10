@@ -20,7 +20,9 @@
             />
           </div>
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700"> Username </label>
+            <label for="email" class="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
             <input
               id="email"
               v-model="form.email"

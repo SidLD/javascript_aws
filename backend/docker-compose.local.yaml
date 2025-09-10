@@ -31,29 +31,6 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-
-  backend:
-    image: node:18-alpine
-    container_name: backend
-    working_dir: /app
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    ports:
-      - 3000:3000
-    environment:
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb://root:password@mongodb:27017/myapp?authSource=admin
-      - FIREBASE_STORAGE_EMULATOR_HOST=firebase-emulator:9199
-      - PORT=3000
-    depends_on:
-      - mongodb
-      - firebase-emulator
-    networks:
-      - app-network
-    restart: unless-stopped
-    command: sh -c "npm install && npm run dev"
-
 volumes:
   mongo_data:
 
