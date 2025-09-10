@@ -1,0 +1,62 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=myapp
+    ports:
+      - 27017:27017
+    networks:
+      - app-network
+
+  firebase-emulator:
+    image: node:18-alpine
+    container_name: firebase-emulator
+    working_dir: /app
+    command: >
+      sh -c "npm install -g firebase-tools &&
+             firebase setup emulators:storage &&
+             firebase emulators:start --project=demo-project --only=storage --import=./data --export-on-exit"
+    volumes:
+      - ./firebase-data:/app/data
+      - ./firebase.json:/app/firebase.json
+    ports:
+      - 9199:9199
+      - 4000:4000  
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  backend:
+    image: node:18-alpine
+    container_name: backend
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://root:password@mongodb:27017/myapp?authSource=admin
+      - FIREBASE_STORAGE_EMULATOR_HOST=firebase-emulator:9199
+      - PORT=3000
+    depends_on:
+      - mongodb
+      - firebase-emulator
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: sh -c "npm install && npm run dev"
+
+volumes:
+  mongo_data:
+
+networks:
+  app-network:
+    driver: bridge
